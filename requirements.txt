@@ -1,0 +1,7 @@
+requests
+beautifulsoup4
+pymongo
+retrying
+fake_useragent
+urllib3
+notebook

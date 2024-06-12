@@ -15,8 +15,8 @@ This project parses RSS feeds, analyzes the content using a Large Language Model
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/reza74rsa/Automated_Blog_Creato.git
-    cd rss-feed-analyzer
+    git clone https://github.com/reza74rsa/Automated_Blog_Creator.git
+    cd Automated_Blog_Creator
     ```
 
 2. Install the required dependencies:

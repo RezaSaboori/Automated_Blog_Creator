@@ -18,7 +18,12 @@ This project parses RSS feeds, analyzes the content using a Large Language Model
     git clone https://github.com/reza74rsa/Automated_Blog_Creator.git
     cd Automated_Blog_Creator
     ```
-
+3. Create the Virtual Environment:
+    ```sh
+    python3 -m venv venv
+    cd venv/bin
+    source activate
+    ```
 2. Install the required dependencies:
     ```sh
     pip install -r requirements.txt

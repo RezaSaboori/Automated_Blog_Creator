@@ -6,3 +6,4 @@ notebook
 jupyterlab
 feedparser
 tqdm
+newspaper3k

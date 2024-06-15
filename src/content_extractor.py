@@ -13,13 +13,14 @@ import requests
 from pymongo import MongoClient
 from datetime import datetime
 from bs4 import BeautifulSoup
-#from readability import Document
+from newspaper import Article
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import random
 import time
 from .proxy_checker import create_session, generate_user_agents
 
+# Function to Extract Main Content from a Web Page
 # Function to Extract Main Content from a Web Page
 def extract_main_content(url, proxy):
     session = create_session()
@@ -30,9 +31,10 @@ def extract_main_content(url, proxy):
             proxies = {'http': proxy, 'https': proxy} if proxy else {}
             response = session.get(url, headers=headers, proxies=proxies, timeout=10)
             if response.status_code == 200:
-                doc = Document(response.text)
-                soup = BeautifulSoup(doc.summary(), 'html.parser')
-                main_content = soup.get_text(separator='\n', strip=True)
+                article = Article(url)
+                article.download(input_html=response.text)
+                article.parse()
+                main_content = article.text
                 return main_content
             else:
                 print(f'Request failed with status code: {response.status_code}, for URL: {url}')
@@ -43,9 +45,10 @@ def extract_main_content(url, proxy):
                 headers = {'User-Agent': generate_user_agents()}
                 response = session.get(url, headers=headers,  timeout=10)
                 if response.status_code == 200:
-                    doc = Document(response.text)
-                    soup = BeautifulSoup(doc.summary(), 'html.parser')
-                    main_content = soup.get_text(separator='\n', strip=True)
+                    article = Article(url)
+                    article.download(input_html=response.text)
+                    article.parse()
+                    main_content = article.text
                     return main_content
                 else:
                     print(f'Request failed with status code: {response.status_code}, for URL: {url}')
@@ -98,18 +101,20 @@ def parse_rss_feed(url, proxy):
     feed = feedparser.parse(url)
     total_urls = len(feed.entries)
     success_count = 0
-    for entry in feed.entries:
-        title = entry.title
-        link = entry.link
-        main_content = extract_main_content(link, proxy)
-        if main_content:
-            success_count += 1
-            article_doc = {
-                "title": title,
-                "link": link,
-                "content": main_content
-            }
-            articles_collection.insert_one(article_doc)
-        else:
-            print(f"Skipping feed entry: {title}")
-    print(f"Successfully fetched {success_count} out of {total_urls} URLs for feed: {url}")
+    with tqdm(total=total_urls, desc=f"Parsing RSS Feed: {url}") as pbar:
+        for entry in feed.entries:
+            title = entry.title
+            link = entry.link
+            main_content = extract_main_content(link, proxy)
+            if main_content:
+                success_count += 1
+                article_doc = {
+                    "title": title,
+                    "link": link,
+                    "content": main_content
+                }
+                articles_collection.insert_one(article_doc)
+            else:
+                tqdm.write(f"Skipping feed entry: {title}")
+            pbar.update(1)
+    tqdm.write(f"Successfully fetched {success_count} out of {total_urls} URLs for feed: {url}")

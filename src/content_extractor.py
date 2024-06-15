@@ -13,7 +13,7 @@ import requests
 from pymongo import MongoClient
 from datetime import datetime
 from bs4 import BeautifulSoup
-from readability import Document
+#from readability import Document
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import random

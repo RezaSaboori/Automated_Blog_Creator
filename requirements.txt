@@ -5,5 +5,5 @@ urllib3
 notebook
 jupyterlab
 feedparser
-readability-lxml
+readability
 tqdm

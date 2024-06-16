@@ -50,7 +50,7 @@ def generate_user_agents():
 # Function to Get Proxy List
 def get_proxy_list():
     url ='https://hasdata.com/free-proxy-list'
-    print(f'Fetching proxy list from {url}')
+    print(f'==>Fetching proxy list from {url}<==')
     response = requests.get(url, headers={'User-Agent': generate_user_agents()})
     soup = BeautifulSoup(response.content, 'html.parser')
     proxies = []

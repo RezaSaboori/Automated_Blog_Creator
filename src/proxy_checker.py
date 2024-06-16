@@ -12,7 +12,6 @@ import feedparser
 import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
-#from readability import Document
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import random
@@ -49,24 +48,26 @@ def generate_user_agents():
     return user_agent
 
 # Function to Get Proxy List
-def get_proxy_list(url):
-    print("Fetching proxy list...")
+def get_proxy_list():
+    url ='https://hasdata.com/free-proxy-list'
+    print(f'Fetching proxy list from {url}')
     response = requests.get(url, headers={'User-Agent': generate_user_agents()})
-    soup = BeautifulSoup(response.text, "lxml")
+    soup = BeautifulSoup(response.content, 'html.parser')
     proxies = []
-    table = soup.find('table', class_='table table-striped table-bordered')
-    for row in table.tbody.find_all('tr'):
-        columns = row.find_all('td')
-        if columns:
-            ip = columns[0].get_text(strip=True)
-            port = columns[1].get_text(strip=True)
-            proxies.append(f"{ip}:{port}")
+    proxy_table = soup.find('table', {'class': 'richtable'})
+    for row in proxy_table.find('tbody').find_all('tr'):
+        cells = row.find_all('td')
+        protocol = cells[2].text.strip()
+        if protocol == 'HTTP':
+            ip = cells[0].text.strip()
+            port = cells[1].text.strip()
+            proxies.append(f'{ip}:{port}')
     print(f"Fetched {len(proxies)} proxies.")
     return proxies
 
 # Function to Check and Sort Proxy Speeds
 def check_proxy_speed(proxies):
-    print("Checking proxy speeds...")
+    print("Checking proxy speeds ...")
     proxy_speeds = []
     for proxy in tqdm(proxies, desc="Checking proxy speeds"):
         try:
@@ -77,7 +78,6 @@ def check_proxy_speed(proxies):
             proxy_speeds.append((proxy, end_time - start_time))
         except requests.RequestException:
             proxy_speeds.append((proxy, float('inf')))  # Assign infinity for unusable proxies
-    print("Finished checking proxy speeds.")
 
     # Sort proxies by speed (ascending order)
     sorted_proxy_speeds = sorted([p for p, speed in proxy_speeds if speed != float('inf')])
